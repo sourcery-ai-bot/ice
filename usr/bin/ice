@@ -497,7 +497,7 @@ class Ice(Gtk.Window):
                 self.array = line.replace("=", " ").split()
                 self.array.pop(0)
                 for word in self.array:
-                    self.iconline = self.iconline + word
+                    self.iconline += word
                 try:
                     self.pixbuf = Pixbuf.new_from_file_at_size(self.iconline,
                                                                16, 16)
@@ -517,7 +517,7 @@ class Ice(Gtk.Window):
                 self.profile = str.replace(line,
                                            'X-ICE-SSB-Profile=', '').strip()
 
-        if self.nameline != "" and self.iconline != "" and self.is_ice is True:
+        if self.nameline != "" and self.iconline != "" and self.is_ice:
             self.details = {
                 'nameline': self.nameline,
                 'profile': self.profile,
@@ -621,17 +621,14 @@ class Ice(Gtk.Window):
             else:
                 GLib.idle_add(self.apply_icon, True)
 
-        elif self.page is None:
-            GLib.idle_add(self.apply_icon, False)
         else:
-            GLib.idle_add(self.apply_icon, None)
+            GLib.idle_add(self.apply_icon, False)
 
     def apply_icon(self, done):
         if done is True:
             self.new_icon = Pixbuf.new_from_file_at_size(
                 _ICON_DIR + "/favicon." + self.icon_ext, 32, 32
             )
-            self.icon.set_from_pixbuf(self.new_icon)
         elif done is False:
             ErrorDialog(
                 "Address Error",
@@ -643,7 +640,6 @@ class Ice(Gtk.Window):
             )
             self.iconpath = _ICE_ICON
             self.new_icon = Pixbuf.new_from_file_at_size(_ICE_ICON, 32, 32)
-            self.icon.set_from_pixbuf(self.new_icon)
         else:
             ErrorDialog(
                 "Error Applying SSB",
@@ -652,7 +648,7 @@ class Ice(Gtk.Window):
             )
             self.iconpath = _ICE_ICON
             self.new_icon = Pixbuf.new_from_file_at_size(_ICE_ICON, 32, 32)
-            self.icon.set_from_pixbuf(self.new_icon)
+        self.icon.set_from_pixbuf(self.new_icon)
         self.download_icon.set_label(_("Use site favicon"))
         return False
 
@@ -663,7 +659,7 @@ class Ice(Gtk.Window):
         self.semiformatted = ""
         self.array = filter(str.isalpha, self.title)
         for obj in self.array:
-            self.semiformatted = self.semiformatted + obj
+            self.semiformatted += obj
         self.formatted = self.semiformatted.lower()
 
         self.loc = self.where.get_active_text()
@@ -745,23 +741,22 @@ class Ice(Gtk.Window):
                     )
                 )
                 self.appfile1.write("IceEpiphany={0}\n".format(formatted))
-            else:
-                if self.isolate_profile is True:
-                    self.profile_path = "{0}/{1}".format(_PROFILES_DIR,
-                                                         formatted)
-                    self.appfile1.write("Exec=" + self.browser +
-                                        " --app=" + address +
-                                        " --class=ICE-SSB-" + formatted +
-                                        " --user-data-dir=" +
-                                        self.profile_path + "\n")
+            elif self.isolate_profile is True:
+                self.profile_path = "{0}/{1}".format(_PROFILES_DIR,
+                                                     formatted)
+                self.appfile1.write("Exec=" + self.browser +
+                                    " --app=" + address +
+                                    " --class=ICE-SSB-" + formatted +
+                                    " --user-data-dir=" +
+                                    self.profile_path + "\n")
 
-                    self.appfile1.write("X-ICE-SSB-Profile=" +
-                                        formatted + "\n")
-                else:
-                    self.appfile1.write("Exec=" + self.browser +
-                                        " --app=" + address +
-                                        " --class=ICE-SSB-" + formatted +
-                                        "\n")
+                self.appfile1.write("X-ICE-SSB-Profile=" +
+                                    formatted + "\n")
+            else:
+                self.appfile1.write("Exec=" + self.browser +
+                                    " --app=" + address +
+                                    " --class=ICE-SSB-" + formatted +
+                                    "\n")
 
             self.appfile1.write("Terminal=false\n")
             self.appfile1.write("X-MultipleArgs=false\n")
@@ -869,7 +864,7 @@ class Ice(Gtk.Window):
         self.array = filter(str.isalpha, self.c)
 
         for obj in self.array:
-            self.semiformatted = self.semiformatted + obj
+            self.semiformatted += obj
 
         self.formatted = self.semiformatted.lower()
         self.appfile = "{0}/{1}.desktop".format(_APPS_DIR, self.formatted)
